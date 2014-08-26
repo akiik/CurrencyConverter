@@ -1,0 +1,52 @@
+Valuutakursid(R) Version 1.0 15/06/2014
+
+Lihtne valuutakursside leidmise veebirakendus, mis kasutab Jersey raamistikku JAX-RS'i 
+rakendusliideste loomisel ning jookseb Jetty veebiserveril. Suhtlus serveri ja kliendi 
+vahel toimub AJAX päringutega ning server tagastab andmed JSON formaadis. 
+
+-----------------------------------------------------------------------------------------
+KASUTAMINE
+-----------------------------------------------------------------------------------------
+ - rakenduse avakuval on 3 valikukasti:
+	- esimene on valuuta, mille suhtes soovitakse kurssi arvutada
+	- teine on valuuta, mille kurssi võrreldes esimese valuutaga soovitakse teada
+	- kolmas on kuupäev, mis võtab teisendamisel arvesse sel kuupäeval olnud kursid
+ - vastusena saadakse
+	- õnnestumise puhul soovitud kurss ning serveri päringu saamise ja töötlemise aeg
+	- ebaõnnestumise korral
+		- 404 not found - kui server ei leidnud kuupäeva kohta andmefaili 
+		- 400 bad request - kui päring oli vigane
+		- 204 no content - kui fail leiti, aga andmeid failis polnud
+		- 0 - kui ühendus serveriga kadus
+
+-----------------------------------------------------------------------------------------
+INSTALLEERIMINE (Windows)
+-----------------------------------------------------------------------------------------
+1. Paigalda omale maven laadides selle aadressilt http://maven.apache.org/
+2. Lae repo alla, sellest saab sinu projekti kaust
+3. Paki lahti currency_rates_2014_04.zip, sellest saab andmete kaust, mida projekt kasutab
+4. Muuda projekti kaustast src\main\java\com\web\app\rest\CurrencyService.java 
+	rida 40:
+	private static final String filesLocation = "F:\\currency_rates\\";
+	F:\\currency_rates\\ asenda kataloogiteega, kuhu pakkisid 3ndas punktis andmed.
+	NB! topelt kaldkriips (\\) kataloogide vahel on vajalik, ka lõpus.
+5. Ava käsurida, navigeeri projekti kataloogi ja käivita käsk "mvn clean install". See kompileerib ja paketeerib sinu projekti.
+6. Käsurealt käivita "mvn jetty:run". See paneb käima jetty mooduli, mis mängib veebiserverit ja suudab jooksutada valmistatud veebiteenust.
+7. Ava veebilehitseja, mine aadressile "http://localhost:9090/". Kui avaneb Valuutakursid rakendus, oli käivitamine edukas.
+Jetty maveni mooduli seadistus on pom.xml, kui port 9090 ei sobi.
+-----------------------------------------------------------------------------------------
+SERVERI PÄRINGU NÄITED
+-----------------------------------------------------------------------------------------
+
+Päring:
+http://localhost:9090/rest/currency?date=2014-04-02&from=EUR&to=AUD
+Vastus:
+{"debugInfo":{"requestReceived":"2014-06-15 06:40:32:722","requestTime":"0.015"},"currencyRate":{"rate":"1.4888"}}
+
+Päring, kui kurssi ei leita:
+http://localhost:9090/rest/currency?date=2014-05-02&from=EUR&to=AUD
+Vastus: 404 Not Found
+
+Vigane päring:
+http://localhost:9090/rest/currency?date=2014-05-02&fro=EUR&to=AUD
+Vastus: 400 Bad Request
